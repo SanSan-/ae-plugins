@@ -1,0 +1,110 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <title>AE Chat / Subtitles</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+<body class="ae-panel">
+<header class="panel-header">
+    <div class="panel-title">AE Chat / Subtitles</div>
+    <div class="panel-mode">
+        <label for="mode">Режим</label>
+        <select id="mode" class="ae-input">
+            <option value="subtitles">Субтитры (.srt)</option>
+            <option value="chat">Чат (.csv)</option>
+        </select>
+    </div>
+</header>
+
+<section id="subtitles-settings" class="ae-section">
+    <div class="section-title">Субтитры</div>
+    <div class="form-grid">
+        <label class="field">
+            <span>Шрифт</span>
+            <input id="sub-font" class="ae-input" type="text" value="Arial"/>
+        </label>
+        <label class="field">
+            <span>Размер</span>
+            <input id="sub-size" class="ae-input" type="number" value="50"/>
+        </label>
+        <label class="field color-field">
+            <span>Цвет текста</span>
+            <input id="sub-color" class="ae-color" type="color" value="#ffffff"/>
+        </label>
+        <label class="field color-field">
+            <span>Цвет обводки</span>
+            <input id="sub-stroke-color" class="ae-color" type="color" value="#1a1a1a"/>
+        </label>
+        <label class="field">
+            <span>Толщина обводки</span>
+            <input id="sub-stroke-width" class="ae-input" type="number" value="3"/>
+        </label>
+        <div class="field pair">
+            <span>Позиция (X, Y)</span>
+            <div class="pair-inputs">
+                <input id="sub-posx" class="ae-input" type="number" value="960">
+                <input id="sub-posy" class="ae-input" type="number" value="1010">
+            </div>
+        </div>
+        <label class="field">
+            <span>Сдвиг по времени (сек)</span>
+            <input id="sub-offset" class="ae-input" type="number" value="0">
+        </label>
+        <label class="field checkbox-field">
+            <input id="sub-single-layer" type="checkbox">
+            <span>Использовать один слой</span>
+        </label>
+    </div>
+    <button id="btn-import-srt" class="ae-btn primary">Загрузить .srt и создать субтитры</button>
+</section>
+
+<section id="chat-settings" class="ae-section">
+    <div class="section-title">Чат</div>
+    <div class="form-grid">
+        <label class="field">
+            <span>Шрифт</span>
+            <input id="chat-font" class="ae-input" type="text" value="Arial"/>
+        </label>
+        <label class="field">
+            <span>Размер</span>
+            <input id="chat-size" class="ae-input" type="number" value="25"/>
+        </label>
+        <label class="field color-field">
+            <span>Цвет текста</span>
+            <input id="chat-color" class="ae-color" type="color" value="#ffffff"/>
+        </label>
+        <label class="field color-field">
+            <span>Цвет имени</span>
+            <input id="chat-user-color" class="ae-color" type="color" value="#ffd966"/>
+        </label>
+        <label class="field color-field">
+            <span>Цвет блока</span>
+            <input id="chat-fill" class="ae-color" type="color" value="#1a1a1a"/>
+        </label>
+        <div class="field pair">
+            <span>Позиция центра (X, Y)</span>
+            <div class="pair-inputs">
+                <input id="chat-posx" class="ae-input" type="number" value="1680">
+                <input id="chat-posy" class="ae-input" type="number" value="700">
+            </div>
+        </div>
+        <div class="field pair">
+            <span>Размер блока (W, H)</span>
+            <div class="pair-inputs">
+                <input id="chat-width" class="ae-input" type="number" value="480">
+                <input id="chat-height" class="ae-input" type="number" value="760">
+            </div>
+        </div>
+        <label class="field">
+            <span>Сдвиг по времени (сек)</span>
+            <input id="chat-offset" class="ae-input" type="number" value="0">
+        </label>
+    </div>
+    <button id="btn-import-chat" class="ae-btn primary">Загрузить .csv и создать чат</button>
+</section>
+
+<script src="CSInterface.js"></script>
+<script src="main.js"></script>
+</body>
+</html>
