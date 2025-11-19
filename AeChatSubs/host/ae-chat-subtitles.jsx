@@ -1,4 +1,4 @@
-﻿// Utility helpers for AE
+// Utility helpers for AE
 function ae_getActiveComp() {
     if (!app.project) return null;
     var item = app.project.activeItem;
@@ -52,6 +52,40 @@ function ae_clearProperties(group) {
     }
 }
 
+function ae_centerLayerAnchor(layer) {
+    try {
+        if (!layer) return;
+        var rect = layer.sourceRectAtTime(0, false);
+        var anchorProp = layer.property("Transform").property("Anchor Point");
+        if (!anchorProp) return;
+        var newAnchor = [rect.left + (rect.width >> 1), rect.top + (rect.height >> 1)];
+        anchorProp.setValue(newAnchor);
+    } catch (err) {
+        ae_log("ae_centerLayerAnchor: ошибка " + err.toString());
+    }
+}
+
+function ae_precomposeLayers(comp, layers, name) {
+    if (!comp || !layers || layers.length === 0) return null;
+    var ids = [];
+    for (var i = 0; i < layers.length; ++i) {
+        var l = layers[i];
+        if (l && typeof l.index === "number") {
+            ids.push(l.index);
+        }
+    }
+    if (ids.length === 0) return null;
+    ids.sort(function (a, b) {
+        return a - b;
+    });
+    try {
+        return comp.layers.precompose(ids, name, true); // move all attributes in new composition
+    } catch (err) {
+        ae_log("ae_precomposeLayers: ошибка " + err.toString());
+        return null;
+    }
+}
+
 function ae_setHoldValue(prop, time, value) {
     var idx;
     if (prop.numKeys === 0) {
@@ -82,22 +116,50 @@ function ae_cloneTextDocument(doc) {
             copy.strokeWidth = doc.strokeWidth;
             copy.strokeOverFill = doc.strokeOverFill;
             copy.justification = doc.justification;
-        } catch (err) {}
+        } catch (err) {
+        }
         return copy;
     }
 }
 
 function ae_copyTextStyle(dst, template) {
     if (!dst || !template) return dst;
-    try { dst.font = template.font; } catch (e) {}
-    try { dst.fontSize = template.fontSize; } catch (e) {}
-    try { dst.applyFill = template.applyFill; } catch (e) {}
-    try { dst.fillColor = template.fillColor; } catch (e) {}
-    try { dst.applyStroke = template.applyStroke; } catch (e) {}
-    try { dst.strokeColor = template.strokeColor; } catch (e) {}
-    try { dst.strokeWidth = template.strokeWidth; } catch (e) {}
-    try { dst.strokeOverFill = template.strokeOverFill; } catch (e) {}
-    try { dst.justification = template.justification; } catch (e) {}
+    try {
+        dst.font = template.font;
+    } catch (e) {
+    }
+    try {
+        dst.fontSize = template.fontSize;
+    } catch (e) {
+    }
+    try {
+        dst.applyFill = template.applyFill;
+    } catch (e) {
+    }
+    try {
+        dst.fillColor = template.fillColor;
+    } catch (e) {
+    }
+    try {
+        dst.applyStroke = template.applyStroke;
+    } catch (e) {
+    }
+    try {
+        dst.strokeColor = template.strokeColor;
+    } catch (e) {
+    }
+    try {
+        dst.strokeWidth = template.strokeWidth;
+    } catch (e) {
+    }
+    try {
+        dst.strokeOverFill = template.strokeOverFill;
+    } catch (e) {
+    }
+    try {
+        dst.justification = template.justification;
+    } catch (e) {
+    }
     return dst;
 }
 
@@ -175,7 +237,9 @@ function ae_importSrt(fontName, fontSize,
         app.beginUndoGroup("Импорт SRT субтитров");
         var textLayer = comp.layers.addText("");
         textLayer.name = "Subtitles";
+        var createdLayers = [textLayer];
         textLayer.property("Position").setValue([posX, posY]);
+        ae_centerLayerAnchor(textLayer);
         var textProp = textLayer.property("Source Text");
         var baseDoc = textProp.value;
         if (fontName && fontName !== "") baseDoc.font = fontName;
@@ -227,8 +291,11 @@ function ae_importSrt(fontName, fontSize,
                 layer.property("Source Text").setValue(doc);
                 layer.inPoint = tStart;
                 layer.outPoint = tEnd;
+                ae_centerLayerAnchor(layer);
+                createdLayers.push(layer);
             }
         }
+        ae_precomposeLayers(comp, createdLayers, "Subtitles Precomp");
         app.endUndoGroup();
         ae_log("ae_importSrt: done");
     } catch (err) {
@@ -287,41 +354,41 @@ function ae_createChatBox(comp, posX, posY, w, h, fillColor) {
 }
 
 function ai_applyUserHighlight(textLayer, nameLength, rgb) {
-  try {
-    if (!textLayer || !rgb) return;
-    if (nameLength <= 0) return;
-    var textProps = textLayer.property("Text");
-    if (!textProps) return;
-    var animatorsGroup = textProps.property("ADBE Text Animators");
-    if (!animatorsGroup) return;
-    var anim = ae_safeAddProperty(animatorsGroup, "ADBE Text Animator");
-    if (!anim) return;
-    anim.name = "User Highlight";
-    var props = anim.property("ADBE Text Animator Properties");
-    if (props) {
-      var fillProp = ae_safeAddProperty(props, "ADBE Text Animator Fill Color");
-      if (fillProp) fillProp.setValue(rgb);
-      var scaleProp = ae_safeAddProperty(props, "ADBE Text Animator Scale");
-      if (scaleProp) scaleProp.setValue([110, 110, 100]);
-    }
-    var selectors = anim.property("ADBE Text Selectors");
-    if (!selectors) return;
-    var selector = ae_safeAddProperty(selectors, "ADBE Text Selector");
-    if (!selector) return;
-    var advanced = selector.property("ADBE Text Range Advanced");
-    if (advanced) advanced.property("ADBE Text Range Units").setValue(1);
-    selector.property("ADBE Text Range Start").setValue(0);
-    var totalChars = nameLength;
     try {
-      totalChars = textLayer.property("Source Text").value.text.length;
-    } catch (innerErr) {
-      totalChars = nameLength;
+        if (!textLayer || !rgb) return;
+        if (nameLength <= 0) return;
+        var textProps = textLayer.property("Text");
+        if (!textProps) return;
+        var animatorsGroup = textProps.property("ADBE Text Animators");
+        if (!animatorsGroup) return;
+        var anim = ae_safeAddProperty(animatorsGroup, "ADBE Text Animator");
+        if (!anim) return;
+        anim.name = "User Highlight";
+        var props = anim.property("ADBE Text Animator Properties");
+        if (props) {
+            var fillProp = ae_safeAddProperty(props, "ADBE Text Animator Fill Color");
+            if (fillProp) fillProp.setValue(rgb);
+            var scaleProp = ae_safeAddProperty(props, "ADBE Text Animator Scale");
+            if (scaleProp) scaleProp.setValue([110, 110, 100]);
+        }
+        var selectors = anim.property("ADBE Text Selectors");
+        if (!selectors) return;
+        var selector = ae_safeAddProperty(selectors, "ADBE Text Selector");
+        if (!selector) return;
+        var advanced = selector.property("ADBE Text Range Advanced");
+        if (advanced) advanced.property("ADBE Text Range Units").setValue(1);
+        selector.property("ADBE Text Range Start").setValue(0);
+        var totalChars = nameLength;
+        try {
+            totalChars = textLayer.property("Source Text").value.text.length;
+        } catch (innerErr) {
+            totalChars = nameLength;
+        }
+        var endValue = Math.max(0, Math.min(nameLength, totalChars));
+        selector.property("ADBE Text Range End").setValue(endValue);
+    } catch (highlightErr) {
+        ae_log("ai_applyUserHighlight: error " + highlightErr.toString());
     }
-    var endValue = Math.max(0, Math.min(nameLength, totalChars));
-    selector.property("ADBE Text Range End").setValue(endValue);
-  } catch (highlightErr) {
-    ae_log("ai_applyUserHighlight: error " + highlightErr.toString());
-  }
 }
 
 function ae_importChat(fontName, fontSize,
@@ -361,6 +428,7 @@ function ae_importChat(fontName, fontSize,
         ae_log("ae_importChat: entries=" + n);
         app.beginUndoGroup("Импорт чата");
         var chatBoxLayer = ae_createChatBox(comp, posX, posY, w, h, [fillR, fillG, fillB]);
+        var createdLayers = [chatBoxLayer];
         var padding = 20;
         var boxWidth = Math.max(40, w - (padding << 1));
         var boxHeight = Math.max(40, h - (padding << 1));
@@ -408,6 +476,7 @@ function ae_importChat(fontName, fontSize,
             var nameLength = Math.min(fullText.length, (userText.length || 0) + 2);
             ai_applyUserHighlight(l, nameLength, [userR, userG, userB]);
             layers.push(l);
+            createdLayers.push(l);
         }
         for (var i = 0; i < n; ++i) {
             var eNew = entries[i];
@@ -435,6 +504,7 @@ function ae_importChat(fontName, fontSize,
                 ae_setHoldValue(opHidden, tNew + animDur, 0);
             }
         }
+        ae_precomposeLayers(comp, createdLayers, "Chat Precomp");
         app.endUndoGroup();
         ae_log("ae_importChat: layers=" + layers.length);
     } catch (err) {
