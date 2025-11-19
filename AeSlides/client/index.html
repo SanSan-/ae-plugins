@@ -1,0 +1,30 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <title>AE Slides</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+<body class="ae-panel">
+<header class="panel-header">
+    <div class="panel-title">AE Slides</div>
+</header>
+
+<section class="ae-section">
+    <div class="section-title">Импорт слайдов</div>
+    <div class="form-grid">
+        <label class="field">
+            <span>Смещение (сек.)</span>
+            <input id="slides-offset" class="ae-input" type="number" value="0" step="0.01">
+        </label>
+    </div>
+    <div class="field">
+        <span>CSV формат: время; имя элемента в Project (pdf / png / jpg / и т.п.)</span>
+    </div>
+    <button id="btn-import-slides" class="ae-btn primary">Импортировать .csv и разложить слайды</button>
+</section>
+
+<script src="CSInterface.js"></script>
+<script src="main.js"></script>
+</body>
+</html>
